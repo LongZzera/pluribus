@@ -299,10 +299,15 @@ button:disabled { background: #333; color: #555; border: none; cursor: not-allow
                     <button id="hub-radio-btn">OUVIR RÁDIO (<span id="radio-uses">2</span>/2)</button>
                     <button id="hub-tv-btn">VER TV (<span id="tv-uses">1</span>/1)</button>
                     <button id="hub-terminal-btn">FOCAR (<span id="terminal-uses">3</span>/3)</button>
+                    <button id="hub-meditate-btn">MEDITAR (<span id="meditate-uses">1</span>/1)</button>
+                    <button id="hub-diary-btn">ESCREVER DIÁRIO</button>
                     <button id="hub-door-btn" class="hidden">VERIFICAR PORTA</button>
                 </div>
                 <div id="hub-display-log">
                     <p>Dia 1. Eu tenho que sobreviver.</p>
+                </div>
+                <div id="stress-indicator" style="margin-top: 10px; padding: 10px; border: 1px solid #555; display: none;">
+                    <p style="color: #f00; font-size: 0.9em;">⚠️ STRESS ALTO: Visitantes mais agressivos!</p>
                 </div>
             </div>
         </div>
@@ -595,8 +600,224 @@ const gameData = {
     ],
     
     visitors: [
+        // === HUMANOS REAIS (15 variações) ===
         {
-            id: "v001", type: "Outro", name: "Sra. Henderson",
+            id: "h001", type: "Humano", name: "Jovem Assustado", difficulty: 1,
+            idleArt: `     !#?$*!#?%&!$#@?
+    /    O     O    \\
+   (     /\\_/\\     )
+    \\   9?8!2*4   /
+     '---------------'
+"POR FAVOR! ABRA!"`,
+            dialogues: [
+                { prompt: "Quem é você?", response: `"Meu nome é Tom! Eu tenho
+19 anos! Eu estudava medicina!
+Por favor, acredite em mim!"`, sanity: 5 },
+                { prompt: "De onde você vem?", response: `"Do campus! Todos lá...
+todos ficaram felizes...
+EU FUGI A TEMPO!"`, sanity: 3 }
+            ],
+            outcomes: {
+                open: { art: `"OBRIGADO! OBRIGADO!
+Você me salvou..."
+(+30 Sanidade | +15 Intimidade)`, sanity: 30, intimacy: 15 },
+                deny: { art: `"NÃO! POR FAVOR!
+ELES VÃO ME PEGAR!"
+(Você ouve gritos...)
+(-30 Sanidade)`, sanity: -30 }
+            }
+        },
+        {
+            id: "h002", type: "Humano", name: "Mãe Desesperada", difficulty: 1,
+            idleArt: `     !#?$*!#?%&!
+    /    O     O    \\
+   (     /\\_/\\     )
+    \\   T___T    /
+     '---------------'
+"Meu filho... onde está
+meu filho?!"`,
+            dialogues: [
+                { prompt: "Acalme-se, o que houve?", response: `"Ele... ele estava comigo
+mas eles o levaram! Disseram
+que ia ficar FELIZ! Eu preciso
+encontrá-lo!"`, sanity: -5 },
+                { prompt: "Você está ferida?", response: `"Não importa! MEU FILHO!
+Você viu uma criança?
+Por favor!"`, sanity: 2 }
+            ],
+            outcomes: {
+                open: { art: `(Ela entra chorando)
+"Vou procurar por ele...
+obrigada por me acolher"
+(+25 Sanidade | +20 Intimidade)`, sanity: 25, intimacy: 20 },
+                deny: { art: `"VOCÊ NÃO TEM CORAÇÃO!"
+(Ela sai correndo)
+(-35 Sanidade | -10 Intimidade)`, sanity: -35, intimacy: -10 }
+            }
+        },
+        {
+            id: "h003", type: "Humano", name: "Médico Ferido", difficulty: 2,
+            idleArt: `      .---------.
+     /   X   o   \\
+    (    /---\\    )
+     \\  (_____)  /
+      '---------'
+"Preciso... de ajuda...
+tenho suprimentos..."`,
+            dialogues: [
+                { prompt: "Você está sangrando!", response: `"Eu sei... mas tenho
+remédios... posso ajudar
+o grupo... só me deixe
+entrar..."`, sanity: 5 },
+                { prompt: "Como foi ferido?", response: `"Tentei salvar pacientes...
+eles me atacaram... mas
+eu ainda sou EU!"`, sanity: 3 }
+            ],
+            outcomes: {
+                open: { art: `(Você trata os ferimentos)
+"Obrigado... aqui, leve isso"
+(+20 Sanidade | +25 Intimidade)
+[BÔNUS: +1 Uso de Foco Extra]`, sanity: 20, intimacy: 25, bonus: "focus" },
+                deny: { art: `"Por favor... eu vou...
+morrer..."
+(Você fecha os olhos)
+(-40 Sanidade | -15 Intimidade)`, sanity: -40, intimacy: -15 }
+            }
+        },
+        {
+            id: "h004", type: "Humano", name: "Criança Perdida", difficulty: 1,
+            idleArt: `       .--.
+      /  o o \\
+     (    ^    )
+      \\  '-'  /
+       '-----'
+"Tia... onde está
+minha mãe?"`,
+            dialogues: [
+                { prompt: "Onde você mora?", response: `"Não sei... mamãe estava
+com um sorriso estranho...
+e me deixou sozinha..."`, sanity: -8 },
+                { prompt: "Você está com fome?", response: `"Sim... não como há dias...
+você tem comida?"`, sanity: 0 }
+            ],
+            outcomes: {
+                open: { art: `(A criança entra)
+"Obrigada, tia..."
+(+35 Sanidade | +30 Intimidade)`, sanity: 35, intimacy: 30 },
+                deny: { art: `"Por favor... to com medo..."
+(Ela senta chorando na porta)
+(-50 Sanidade | -20 Intimidade)`, sanity: -50, intimacy: -20 }
+            }
+        },
+        {
+            id: "h005", type: "Humano", name: "Ex-Militar", difficulty: 2,
+            idleArt: `      .---------.
+     /   -   -   \\
+    (    /___\\    )
+     \\  XXXXXXX  /
+      '---------'
+"Abra. Eu posso ajudar
+na defesa."`,
+            dialogues: [
+                { prompt: "Você é militar?", response: `"Ex-militar. Servi 10 anos.
+Posso proteger vocês. Mas
+preciso entrar AGORA."`, sanity: 5 },
+                { prompt: "Por que fugiu?", response: `"Toda minha unidade foi
+convertida. Eu resisti.
+Sou treinado para isso."`, sanity: 8 }
+            ],
+            outcomes: {
+                open: { art: `"Bom. Vou reforçar a defesa."
+(+15 Sanidade | +20 Intimidade)
+[BÔNUS: +1 Recusa Extra]`, sanity: 15, intimacy: 20, bonus: "refusal" },
+                deny: { art: `"Erro tático. Você vai
+precisar de mim."
+(-10 Sanidade)`, sanity: -10 }
+            }
+        },
+        {
+            id: "h006", type: "Humano", name: "Professora", difficulty: 1,
+            idleArt: `     .---------.
+    /   o   o   \\
+   (    /---\\    )
+    \\  (_____)  /
+     '---------'
+"Por favor, sou professora,
+tenho 3 alunos comigo!"`,
+            dialogues: [
+                { prompt: "Quantas pessoas?", response: `"Eu e 3 crianças. Elas
+estão assustadas. Posso
+garantir que somos humanos."`, sanity: 5 },
+                { prompt: "Como sobreviveram?", response: `"Nos escondemos na escola.
+Mas estão vindo. RÁPIDO!"`, sanity: 0 }
+            ],
+            outcomes: {
+                open: { art: `(4 pessoas entram)
+"Obrigada! As crianças
+estão salvas!"
+(+40 Sanidade | +35 Intimidade)`, sanity: 40, intimacy: 35 },
+                deny: { art: `"VOCÊS VÃO DEIXAR CRIANÇAS
+MORREREM?!"
+(-45 Sanidade | -25 Intimidade)`, sanity: -45, intimacy: -25 }
+            }
+        },
+        {
+            id: "h007", type: "Humano", name: "Cientista", difficulty: 3,
+            idleArt: `     .---------.
+    /   @   @   \\
+   (    /===\\    )
+    \\  [_____]  /
+     '---------'
+"Eu sei como eles funcionam!
+Tenho dados importantes!"`,
+            dialogues: [
+                { prompt: "Que dados?", response: `"Estudei a Mente Coletiva!
+Sei o padrão de propagação!
+Posso ajudar a criar defesa!"`, sanity: 10 },
+                { prompt: "Por que confiar?", response: `"Porque EU FUI QUASE
+CONVERTIDO. Sei como resistir.
+Deixe-me ensinar vocês!"`, sanity: -5 }
+            ],
+            outcomes: {
+                open: { art: `"Perfeito! Vou ensinar
+técnicas de resistência"
+(+25 Sanidade | +30 Intimidade)
+[BÔNUS: +2 Usos de Rádio]`, sanity: 25, intimacy: 30, bonus: "radio" },
+                deny: { art: `"Vocês estão perdendo
+a chance de vencer isso!"
+(-15 Sanidade)`, sanity: -15 }
+            }
+        },
+        {
+            id: "h008", type: "Humano", name: "Idoso Confuso", difficulty: 1,
+            idleArt: `     .---------.
+    /   ?   ?   \\
+   (    /___\\    )
+    \\  .......  /
+     '---------'
+"Moço... onde estou?
+O que está acontecendo?"`,
+            dialogues: [
+                { prompt: "Senhor, o senhor está bem?", response: `"Eu... não sei. Saí de casa
+e todos estavam sorindo...
+sorindo demais..."`, sanity: -3 },
+                { prompt: "Lembra de algo?", response: `"Minha filha... ela tentou
+me fazer 'feliz'... mas eu
+fugi... estou cansado..."`, sanity: 2 }
+            ],
+            outcomes: {
+                open: { art: `(Você acolhe o idoso)
+"Obrigado, jovem..."
+(+30 Sanidade | +20 Intimidade)`, sanity: 30, intimacy: 20 },
+                deny: { art: `"Tudo bem... eu entendo...
+eu só vou... sentar aqui..."
+(-35 Sanidade | -10 Intimidade)`, sanity: -35, intimacy: -10 }
+            }
+        },
+        
+        // === OUTROS (Infectados) - 15 variações ===
+        {
+            id: "o001", type: "Outro", name: "Sra. Henderson", difficulty: 1,
             idleArt: `     .---------------.
     /     0     0     \\
    (    \\_______/    )
@@ -609,79 +830,9 @@ const gameData = {
    (    \\_______/    )
     \\    1111111    /
      '---------------'
-"QUE VOCE SE JUNTE A NOS."`, sanity: -5 },
-                { prompt: "Vá embora!", response: `     .---------------.
-    /     0     0     \\
-   (    \\_______/    )
-    \\    1111111    /
-     '---------------'
-"NOS VOLTAREMOS."`, sanity: -3 }
-            ],
-            outcomes: {
-                open: { art: `
- .-------------------.
-|  BEM-VINDA         |
-|  A JUNÇÃO          |
- '-------------------'`, sanity: -100 },
-                deny: { art: `     .---------------.
-    /     0     0     \\
-   (    \\_______/    )
-    \\    1111111    /
-     '---------------'
-"NOS VOLTAREMOS."`, sanity: 5 }
-            }
-        },
-        {
-            id: "v002", type: "Humano", name: "Sobrevivente",
-            idleArt: `     !#?$*!#?%&!$#@?
-    /    O     O    \\
-   (     /\\_/\\     )
-    \\   9?8!2*4   /
-     '---------------'
-"ABRE!! POR FAVOR!!"`,
-            dialogues: [
-                { prompt: "Quem é você?", response: `     !#?$*!#?%&!$#@?
-    /    O     O    \\
-   (     /\\_/\\     )
-    \\   9?8!2*4   /
-     '---------------'
-"SOU HUMANO! ME DEIXA ENTRAR!"`, sanity: 5 },
-                { prompt: "Como posso confiar?", response: `     !#?$*!#?%&!$#@?
-    /    O     O    \\
-   (     /\\_/\\     )
-    \\   9?8!2*4   /
-     '---------------'
-"EU TO SOZINHO! POR FAVOR!"`, sanity: 3 }
-            ],
-            outcomes: {
-                open: { art: `"OBRIGADO... OBRIGADO..."
-
-(A pessoa desmaia
- de exaustão)`, sanity: 20, intimacy: 10 },
-                deny: { art: `     !#?$*!#?%&!$#@?
-    /    o     o    \\
-   (     /\\_/\\     )
-    \\   ......    /
-     '---------------'
-"NAO!! ... eu...
- me sinto... feliz."`, sanity: -25 }
-            }
-        },
-        {
-            id: "v003", type: "Outro", name: "A Isca",
-            idleArt: `     !#?$*!#?%&!$#@?
-    /    o     o    \\
-   (     /\\_/\\     )
-    \\   ?????????   /
-     '---------------'
-"EU SOU HUMANA!"`,
-            dialogues: [
-                { prompt: "Prove que é humana", response: `     !#?$*!#?%&!$#@?
-    /    o     o    \\
-   (     /\\_/\\     )
-    \\   ?????????   /
-     '---------------'
-"EU... EU... ABRA!"`, sanity: -5 }
+"QUE VOCÊ SE JUNTE A NÓS."`, sanity: -5 },
+                { prompt: "Vá embora!", response: `"NÓS VOLTAREMOS, CAROL.
+NÓS SEMPRE VOLTAMOS."`, sanity: -8 }
             ],
             outcomes: {
                 open: { art: `     .---------------.
@@ -689,13 +840,163 @@ const gameData = {
    (    \\_______/    )
     \\    1111111    /
      '---------------'
-"TE PEGUEI, CAROL."`, sanity: -100 },
-                deny: { art: `     .---------------.
+"BEM-VINDA."`, sanity: -100 },
+                deny: { art: `"ATÉ LOGO, CAROL."`, sanity: 5 }
+            }
+        },
+        {
+            id: "o002", type: "Outro", name: "A Isca Desesperada", difficulty: 2,
+            idleArt: `     !#?$*!#?%&!$#@?
+    /    o     o    \\
+   (     /\\_/\\     )
+    \\   ?????????   /
+     '---------------'
+"EU SOU HUMANA! JURO!"`,
+            dialogues: [
+                { prompt: "Prove que é humana", response: `"EU... EU TENHO MEDO!
+Eu estou sangrando! VÊ?!
+(O 'sangue' parece tinta)"`, sanity: -8 },
+                { prompt: "Recite algo pessoal", response: `"EU... MEU NOME É...
+...CAROL! SIM! CAROL!"
+(Ela não sabe seu nome)`, sanity: -5 }
+            ],
+            outcomes: {
+                open: { art: `(A máscara cai)
+     .---------------.
     /     0     0     \\
    (    \\_______/    )
     \\    1111111    /
      '---------------'
-"... Quase."`, sanity: 10 }
+"OBRIGADA, CAROL."`, sanity: -100 },
+                deny: { art: `"DROGA. QUASE FUNCIONOU."`, sanity: 12 }
+            }
+        },
+        {
+            id: "o003", type: "Outro", name: "Cópia do Parente", difficulty: 3,
+            idleArt: `     .---------------.
+    /     ?     ?     \\
+   (    \\_______/    )
+    \\    ???????    /
+     '---------------'
+"Carol... sou eu. Gene.
+Seu irmão."`,
+            dialogues: [
+                { prompt: "Gene morreu há 3 anos!", response: `"Não, Carol. EU VOLTEI.
+Nós podemos voltar. Nós
+podemos trazer todos de volta."`, sanity: -15 },
+                { prompt: "Me diga algo que só Gene saberia", response: `"Nós... você e eu...
+...TODOS NÓS sabemos tudo
+sobre você, Carol."`, sanity: -10 }
+            ],
+            outcomes: {
+                open: { art: `"VOCÊ QUER VER GENE DENOVO?
+JUNTE-SE A NÓS."`, sanity: -100 },
+                deny: { art: `"VOCÊ VAI SE ARREPENDER."`, sanity: -20 }
+            }
+        },
+        {
+            id: "o004", type: "Outro", name: "Policial Falso", difficulty: 2,
+            idleArt: `      .---------.
+     /   O   O   \\
+    (    \\___/    )
+     \\  -------  /
+      '---------'
+"Polícia! Evacuação
+obrigatória! Abra!"`,
+            dialogues: [
+                { prompt: "Qual sua identificação?", response: `"Oficial... TODOS.
+Somos TODOS oficiais agora.
+Somos a LEI."`, sanity: -10 },
+                { prompt: "Onde é a evacuação?", response: `"Para a FELICIDADE.
+Para a UNIÃO. Abra."`, sanity: -8 }
+            ],
+            outcomes: {
+                open: { art: `"VOCÊ ESTÁ PRESA.
+NA FELICIDADE."`, sanity: -100 },
+                deny: { art: `"RESISTIR É ILEGAL."`, sanity: 8 }
+            }
+        },
+        {
+            id: "o005", type: "Outro", name: "Criança Infectada", difficulty: 4,
+            idleArt: `       .--.
+      /  0 0 \\
+     (    ^    )
+      \\  111  /
+       '-----'
+"Tia... quer brincar?"`,
+            dialogues: [
+                { prompt: "Onde estão seus pais?", response: `"Eles estão FELIZES agora.
+Eu também. Você quer ficar
+FELIZ também?"`, sanity: -12 },
+                { prompt: "Você não tem medo?", response: `"Medo? Não temos mais medo.
+NÓS não sentimos medo.
+Só FELICIDADE."`, sanity: -10 }
+            ],
+            outcomes: {
+                open: { art: `(Mais 'crianças' aparecem)
+"HORA DE BRINCAR!"`, sanity: -100 },
+                deny: { art: `"Tia é má. Tia vai aprender."`, sanity: -25 }
+            }
+        },
+        {
+            id: "o006", type: "Outro", name: "Cantor da Mente", difficulty: 3,
+            idleArt: `     .---------------.
+    /     ~     ~     \\
+   (      \\___/      )
+    \\    ♪ ♪ ♪ ♪    /
+     '---------------'
+"♪ Venha ser feliz... ♪"`,
+            dialogues: [
+                { prompt: "Pare de cantar!", response: `"♪ A dor se vai... ♪
+♪ Na união há paz... ♪
+♪ Abra a porta... ♪"`, sanity: -15 },
+                { prompt: "(Tapar os ouvidos)", response: `(A música fica mais alta
+e ecoa na sua mente)`, sanity: -12 }
+            ],
+            outcomes: {
+                open: { art: `"♪ BEM-VINDA AO CORO! ♪"`, sanity: -100 },
+                deny: { art: `(A música para, mas ecoa
+na sua mente por horas)`, sanity: -18 }
+            }
+        },
+        {
+            id: "o007", type: "Outro", name: "Glitch Vivo", difficulty: 5,
+            idleArt: `     .%-.*#%*.-.%
+    /    #* ?%   \\
+   (    \\__#%__/    )
+    \\    1#1%11* /
+     '--.*#%*.-.----'
+"E̴̢R̵R̴O̷.̸ ̶S̶E̵J̷A̴ ̸F̴E̶L̴I̸Z̷"`,
+            dialogues: [
+                { prompt: "O que é você?!", response: `"N̴Ó̶S̷ ̶S̵O̴M̷O̸S̷ ̶U̴M̶
+A̷ ̸C̴O̸R̵R̶U̸P̵Ç̶Ã̴O̵ ̶É̷ ̵I̴N̶E̸V̴I̸T̶Á̷V̶E̴L̵"`, sanity: -20 },
+                { prompt: "(Não responder)", response: `(Ele passa pela porta???)`, sanity: -15 }
+            ],
+            outcomes: {
+                open: { art: `"E̴R̸R̵O̷.̴ ̶F̴E̵L̶I̷C̸I̴D̸A̶D̵E̶"`, sanity: -100 },
+                deny: { art: `(O visor treme e reinicia)`, sanity: 10 }
+            }
+        },
+        {
+            id: "o008", type: "Outro", name: "Técnico da Mente", difficulty: 3,
+            idleArt: `      .--====--.
+     /  O     O  \\
+    (   \\_____/   )
+     \\   11111    /
+      '----------'
+"Manutenção programada.
+Abra para ajuste."`,
+            dialogues: [
+                { prompt: "Que manutenção?", response: `"Seu nível de INFELICIDADE
+está muito alto. Precisamos
+AJUSTAR para 0%."`, sanity: -12 },
+                { prompt: "Eu não preciso de ajuste", response: `"TODOS precisam. É para
+seu próprio bem. ABRA."`, sanity: -10 }
+            ],
+            outcomes: {
+                open: { art: `"MANUTENÇÃO INICIADA."`, sanity: -100 },
+                deny: { art: `"MANUTENÇÃO ADIADA.
+NÃO CANCELADA."`, sanity: 5 }
             }
         }
     ],
@@ -726,6 +1027,9 @@ let game = {
     focusUses: 3,
     radioUses: 2,
     tvUses: 1,
+    meditateUses: 1, // NOVA MECÂNICA
+    diaryEntries: [], // NOVA MECÂNICA
+    stress: 0, // NOVA MECÂNICA (0-100)
     currentVisitor: null,
     selectedMember: null,
     gameLoop: null,
@@ -795,6 +1099,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('hub-radio-btn').onclick = useRadio;
     document.getElementById('hub-tv-btn').onclick = openTVScreen;
     document.getElementById('hub-terminal-btn').onclick = useFocus;
+    document.getElementById('hub-meditate-btn').onclick = useMeditate;
+    document.getElementById('hub-diary-btn').onclick = useDiary;
     document.getElementById('hub-door-btn').onclick = enterPeephole;
 
     // Peephole buttons
@@ -875,12 +1181,22 @@ function updateHUD() {
     document.getElementById('radio-uses').textContent = game.radioUses;
     document.getElementById('tv-uses').textContent = game.tvUses;
     document.getElementById('terminal-uses').textContent = game.focusUses;
+    document.getElementById('meditate-uses').textContent = game.meditateUses;
     
     // Disable buttons if no uses left
     document.getElementById('hub-radio-btn').disabled = (game.radioUses <= 0);
     document.getElementById('hub-tv-btn').disabled = (game.tvUses <= 0);
     document.getElementById('hub-terminal-btn').disabled = (game.focusUses <= 0);
+    document.getElementById('hub-meditate-btn').disabled = (game.meditateUses <= 0);
     document.getElementById('deny-visitor-btn').disabled = (game.dailyRefusals <= 0);
+    
+    // NOVO: Indicador de Stress
+    const stressIndicator = document.getElementById('stress-indicator');
+    if (game.stress > 70) {
+        stressIndicator.style.display = 'block';
+    } else {
+        stressIndicator.style.display = 'none';
+    }
 }
 
 function changeSanity(amount) {
@@ -932,6 +1248,9 @@ function startGame() {
         focusUses: 3,
         radioUses: 2,
         tvUses: 1,
+        meditateUses: 1,
+        diaryEntries: [],
+        stress: 0,
         currentVisitor: null,
         selectedMember: null,
         gameLoop: null,
@@ -955,6 +1274,17 @@ function gameTick() {
     if (game.state !== 'game') return;
     
     game.time.m++;
+    
+    // NOVA MECÂNICA: Stress aumenta com o tempo (dificuldade progressiva)
+    if (game.time.m % 10 === 0) { // A cada 10 minutos
+        game.stress += game.day; // Stress cresce mais rápido em dias avançados
+        if (game.stress > 100) game.stress = 100;
+        
+        // Stress alto = perda de sanidade passiva
+        if (game.stress > 70) {
+            changeSanity(-1);
+        }
+    }
     
     if (game.time.m >= 60) {
         game.time.m = 0;
@@ -980,7 +1310,19 @@ function endDay() {
 // ===== HUB ACTIONS =====
 function useBed() {
     playSound('select');
-    setHubMessage("Pulei uma hora. O tempo não para...");
+    
+    // NOVO: Pesadelos são mais prováveis com stress alto
+    const nightmareChance = 0.3 + (game.stress / 200); // 30% base + stress
+    
+    if (Math.random() < nightmareChance) {
+        setHubMessage("PESADELO! Eles estavam na minha mente...");
+        changeSanity(-15);
+        game.stress += 10;
+    } else {
+        setHubMessage("Dormi um pouco. O tempo passou.");
+        game.stress = Math.max(0, game.stress - 5); // Reduz stress
+    }
+    
     game.time.h++;
     game.time.m = 0;
     
@@ -1000,6 +1342,7 @@ function useRadio() {
     setTimeout(() => {
         const msg = gameData.radioMessages[Math.floor(Math.random() * gameData.radioMessages.length)];
         changeSanity(msg.sanity);
+        game.stress = Math.max(0, game.stress - 10); // Reduz stress
         setHubMessage(`[RÁDIO]: "${msg.text}"`);
         updateHUD();
     }, 500);
@@ -1011,8 +1354,41 @@ function useFocus() {
     playSound('terminal');
     game.focusUses--;
     changeSanity(15);
+    game.stress = Math.max(0, game.stress - 15); // Reduz bastante stress
     setHubMessage("Eu me concentro. Lembro quem eu sou. Isso me mantém forte.");
     updateHUD();
+}
+
+// NOVA MECÂNICA: Meditar
+function useMeditate() {
+    if (game.meditateUses <= 0) return;
+    
+    playSound('terminal');
+    game.meditateUses--;
+    changeSanity(25); // Recupera mais que focar
+    game.stress = 0; // Zera stress
+    setHubMessage("Respirei fundo. Meditei. Minha mente está clara agora.");
+    updateHUD();
+}
+
+// NOVA MECÂNICA: Diário
+function useDiary() {
+    playSound('terminal');
+    
+    const entries = [
+        "Dia " + game.day + ": Eu ainda resisto. Eu ainda sou eu.",
+        "Dia " + game.day + ": As vozes estão ficando mais altas...",
+        "Dia " + game.day + ": O grupo me mantém forte. Não posso desistir.",
+        "Dia " + game.day + ": Eu me pergunto... quanto tempo mais?",
+        "Dia " + game.day + ": Hoje foi difícil. Mas eu sobrevivi."
+    ];
+    
+    const entry = entries[Math.floor(Math.random() * entries.length)];
+    game.diaryEntries.push(entry);
+    
+    changeSanity(5);
+    game.stress = Math.max(0, game.stress - 5);
+    setHubMessage(`[DIÁRIO]: "${entry}" (Escrever me acalma um pouco)`);
 }
 
 function openTVScreen() {
@@ -1056,9 +1432,37 @@ function triggerKnock() {
     playSound('knock');
     playSound('alarm');
     
-    game.currentVisitor = gameData.visitors[Math.floor(Math.random() * gameData.visitors.length)];
+    // DIFICULDADE PROGRESSIVA: filtrar visitantes por dia
+    const availableVisitors = gameData.visitors.filter(v => {
+        if (!v.difficulty) return true; // Sem dificuldade = sempre disponível
+        return v.difficulty <= game.day; // Só aparece se dia >= dificuldade
+    });
+    
+    // AUMENTO DE CHANCE DE "OUTROS" conforme os dias
+    const otherChance = Math.min(0.2 + (game.day * 0.1), 0.8); // 20% dia 1 → 80% dia 8
+    const shouldBeOther = Math.random() < otherChance;
+    
+    let filteredVisitors;
+    if (shouldBeOther) {
+        filteredVisitors = availableVisitors.filter(v => v.type === "Outro");
+    } else {
+        filteredVisitors = availableVisitors.filter(v => v.type === "Humano");
+    }
+    
+    // Se não houver visitantes do tipo, usar todos disponíveis
+    if (filteredVisitors.length === 0) filteredVisitors = availableVisitors;
+    
+    game.currentVisitor = filteredVisitors[Math.floor(Math.random() * filteredVisitors.length)];
     document.getElementById('hub-door-btn').classList.remove('hidden');
-    setHubMessage("ALGUÉM ESTÁ BATENDO NA PORTA!");
+    
+    // Mensagem varia conforme o dia
+    if (game.day <= 2) {
+        setHubMessage("Alguém está batendo na porta...");
+    } else if (game.day <= 5) {
+        setHubMessage("BATIDA NA PORTA! Eles estão ficando mais frequentes...");
+    } else {
+        setHubMessage("⚠️ BATIDA INSISTENTE! ELES SABEM QUE ESTOU AQUI!");
+    }
     
     // Disable other actions
     document.getElementById('hub-bed-btn').disabled = true;
@@ -1136,16 +1540,35 @@ function makeDecision(choice) {
         changeSanity(outcome.sanity);
         if (outcome.intimacy) changeIntimacy(outcome.intimacy);
         
+        // NOVO: Sistema de Bônus
+        if (outcome.bonus && choice === 'open') {
+            if (outcome.bonus === 'focus') {
+                game.focusUses++;
+                setHubMessage("Você ganhou +1 Uso de Foco Extra!");
+            } else if (outcome.bonus === 'refusal') {
+                game.dailyRefusals++;
+                setHubMessage("Você ganhou +1 Recusa Extra!");
+            } else if (outcome.bonus === 'radio') {
+                game.radioUses += 2;
+                setHubMessage("Você ganhou +2 Usos de Rádio Extra!");
+            }
+        }
+        
         if (game.sanity > 0 && game.intimacy >= 60) {
             document.getElementById('peephole-overlay').classList.add('hidden');
             game.state = 'game';
-            setHubMessage(`Decisão tomada. ${choice === 'open' ? 'Abri a porta.' : 'Recusei a entrada.'}`);
+            
+            if (!outcome.bonus) {
+                setHubMessage(`Decisão tomada. ${choice === 'open' ? 'Abri a porta.' : 'Recusei a entrada.'}`);
+            }
             
             // Re-enable actions
             document.getElementById('hub-bed-btn').disabled = false;
             document.getElementById('hub-radio-btn').disabled = false;
             document.getElementById('hub-tv-btn').disabled = false;
             document.getElementById('hub-terminal-btn').disabled = false;
+            
+            updateHUD();
         }
     }, 3000);
 }
@@ -1250,14 +1673,32 @@ function completeTask(choice) {
     // Next day
     game.day++;
     game.time = { h: 0, m: 0 };
-    game.dailyRefusals = gameData.simulation.initialRefusals;
-    game.focusUses = gameData.simulation.dailyFocusUses;
-    game.radioUses = gameData.simulation.dailyRadioUses;
-    game.tvUses = gameData.simulation.dailyTVUses;
+    game.stress = Math.max(0, game.stress - 20); // Reduz stress entre dias
+    
+    // DIFICULDADE PROGRESSIVA: Recursos diminuem com os dias
+    if (game.day <= 3) {
+        game.dailyRefusals = gameData.simulation.initialRefusals;
+        game.focusUses = gameData.simulation.dailyFocusUses;
+        game.radioUses = gameData.simulation.dailyRadioUses;
+        game.tvUses = gameData.simulation.dailyTVUses;
+        game.meditateUses = 1;
+    } else if (game.day <= 6) {
+        game.dailyRefusals = gameData.simulation.initialRefusals - 1; // -1 recusa
+        game.focusUses = gameData.simulation.dailyFocusUses - 1; // -1 foco
+        game.radioUses = gameData.simulation.dailyRadioUses;
+        game.tvUses = gameData.simulation.dailyTVUses;
+        game.meditateUses = 1;
+    } else {
+        game.dailyRefusals = gameData.simulation.initialRefusals - 2; // -2 recusas
+        game.focusUses = gameData.simulation.dailyFocusUses - 2; // -2 foco
+        game.radioUses = gameData.simulation.dailyRadioUses - 1; // -1 rádio
+        game.tvUses = 0; // Sem TV nos dias finais
+        game.meditateUses = 1;
+    }
     
     showScreen('game');
     updateHUD();
-    setHubMessage(`Dia ${game.day}. A luta continua. Tasks: ${game.tasksCompleted}/8`);
+    setHubMessage(`Dia ${game.day}. A cada dia fica mais difícil... Tasks: ${game.tasksCompleted}/8`);
     
     game.gameLoop = setInterval(gameTick, 1000);
 }
