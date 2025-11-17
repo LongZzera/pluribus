@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLURIBUS: A JUNÇÃO</title>
+    <style>
+/* Configuração Geral */
+body, html {
+    margin: 0; padding: 0; width: 100%; height: 100%;
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #000; color: #fff;
+    overflow: hidden; text-shadow: 0 0 3px #fff;
+}
+body::after {
+    content: " "; display: block; position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.3),
+    rgba(0, 0, 0, 0.3) 1px, transparent 1px, transparent 2px);
+    pointer-events: none; z-index: 9999;
+}
+.screen {
+    width: 100vw; height: 100vh; display: none; position: absolute;
+    top: 0; left: 0; align-items: center; justify-content: center;
+    flex-direction: column;
+}
+.screen.active { display: flex; }
+.hidden { display: none !important; }
+
+/* Menus */
+.menu-container {
+    text-align: center; background: rgba(10, 10, 10, 0.9);
+    padding: 40px; border: 2px solid #ff0;
+    box-shadow: inset 0 0 15px #ff0; max-width: 800px;
+}
+.menu-container h1 { color: #ff0; text-shadow: 0 0 10px #ff0; font-size: 2.5em; }
+.menu-container h2 { color: #ff0; text-shadow: 0 0 8px #ff0; }
+.menu-container p { color: #fff; margin: 10px 0; }
+button {
+    display: inline-block; padding: 10px 20px; margin: 5px;
+    font-family: 'Courier New', Courier, monospace; font-size: 1.1em;
+    font-weight: bold; background-color: #ff0; color: #000;
+    border: none; cursor: pointer; text-shadow: none;
+    transition: background-color 0.2s, color 0.2s;
+}
+button:hover { background-color: #000; color: #ff0; border: 1px solid #ff0; }
+button:disabled { background: #333; color: #555; border: none; cursor: not-allowed; }
+.setting-item { margin: 20px 0; }
+
+/* HUD */
+#game-screen { justify-content: flex-start; }
+#game-hud {
+    width: 100%; padding: 10px; background: #000;
+    border-bottom: 2px solid #ff0; display: flex;
+    justify-content: space-between; box-sizing: border-box;
+    position: absolute; top: 0; z-index: 10;
+}
+.hud-column { width: 48%; }
+.hud-item { font-size: 1em; color: #fff; margin-bottom: 5px; }
+#clock-display {
+    font-size: 1.5em; color: #ff0; text-shadow: 0 0 5px #ff0; text-align: right;
+}
+#sanity-bar-container, #intimacy-bar-container {
+    width: 100%; height: 20px; background: #111;
+    border: 1px solid #ff0; margin-top: 2px;
+}
+#sanity-bar, #intimacy-bar {
+    width: 100%; height: 100%; background: #fff;
+    transition: width 0.5s, background-color 0.5s;
+}
+#intimacy-bar { background: #0f0; }
+
+/* Hub do Apartamento */
+#apartment-hub-view {
+    width: 100%; height: 100%; display: flex;
+    align-items: center; justify-content: center; padding-top: 120px;
+}
+.hub-container { width: 90%; max-width: 900px; text-align: center; }
+#apartment-art {
+    font-size: 1.2em; color: #fff; border: 2px solid #fff;
+    padding: 15px; text-align: left; white-space: pre;
+}
+.hub-actions button { font-size: 1.1em; padding: 10px 15px; margin: 5px; }
+#hub-door-btn {
+    color: #ff0; background: #000; border: 1px solid #ff0;
+    animation: pulse 1s infinite;
+}
+@keyframes pulse {
+    0% { box-shadow: 0 0 5px #ff0; }
+    50% { box-shadow: 0 0 20px #ff0; }
+    100% { box-shadow: 0 0 5px #ff0; }
+}
+#hub-display-log {
+    margin-top: 20px; border: 2px solid #555; background: #080808;
+    width: 100%; min-height: 60px; padding: 10px;
+    font-style: italic; color: #aaa; box-sizing: border-box;
+}
+
+/* Visor (Peephole) */
+#peephole-overlay {
+    position: absolute; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.95); display: flex;
+    align-items: center; justify-content: center;
+    flex-direction: column; z-index: 100;
+}
+#visitor-ascii-art {
+    font-size: 1em; line-height: 1; white-space: pre;
+    background: #080808; border: 3px solid #ff0; padding: 20px;
+    width: 500px; height: 300px; overflow: auto;
+    box-shadow: inset 0 0 20px #ff0; color: #fff;
+}
+#peephole-ui { margin-top: 10px; text-align: center; }
+#tool-display {
+    border: 1px solid #ff0; background: #000; color: #ff0;
+    text-shadow: 0 0 5px #ff0; padding: 5px;
+    margin-bottom: 10px; font-size: 0.9em;
+}
+#dialogue-options button { background: #ff0; color: #000; margin: 5px; }
+#decision-buttons button { font-size: 1.3em; margin: 10px; }
+#exit-peephole-btn { position: absolute; bottom: 20px; right: 20px; }
+
+/* Tela de Reunião (Discord) */
+#meeting-screen {
+    background: #1a1a1a; overflow-y: auto;
+}
+.meeting-container {
+    width: 90%; max-width: 1000px; text-align: center; padding: 20px;
+}
+.meeting-title {
+    color: #ff0; text-shadow: 0 0 10px #ff0; font-size: 2em;
+    margin-bottom: 20px;
+}
+.group-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 15px; margin: 20px 0;
+}
+.member-card {
+    background: #2a2a2a; border: 2px solid #555;
+    padding: 15px; cursor: pointer; transition: all 0.3s;
+}
+.member-card:hover { border-color: #ff0; box-shadow: 0 0 10px #ff0; }
+.member-card.selected { border-color: #0f0; box-shadow: 0 0 15px #0f0; }
+.member-name { color: #ff0; font-size: 1.3em; margin-bottom: 10px; }
+.member-status { color: #aaa; font-size: 0.9em; margin-bottom: 5px; }
+.intimacy-level {
+    color: #0f0; font-size: 1em; margin-top: 10px;
+}
+.interaction-panel {
+    background: #080808; border: 2px solid #ff0;
+    padding: 20px; margin-top: 20px; min-height: 200px;
+}
+.interaction-buttons button {
+    display: block; width: 100%; margin: 10px 0;
+}
+
+/* TV Screen */
+#tv-watch-screen { background: #0a0a0a; }
+#tv-art { color: #ff0; text-shadow: 0 0 5px #ff0; }
+#tv-dialogue-box {
+    border: 1px solid #aaa; background: #111;
+    padding: 10px; margin: 20px 0; min-height: 80px;
+}
+#tv-choices button { display: block; width: 100%; margin: 10px 0; }
+
+/* Mission Screen */
+#task-choices button { display: block; width: 100%; margin: 10px 0; text-align: left; }
+
+/* Credits */
+.credits-text {
+    color: #aaa; font-size: 0.9em; margin-top: 30px;
+    border-top: 1px solid #555; padding-top: 20px;
+}
+    </style>
+</head>
+<body>
+
+    <div id="loading-screen" class="screen active">
+        <h1>CARREGANDO...</h1>
+    </div>
+
+    <div id="main-menu-screen" class="screen">
+        <div class="menu-container">
+            <h1>PLURIBUS: A JUNÇÃO</h1>
+            <p>EDIÇÃO HIVE MIND</p>
+            <div id="audio-status" style="margin: 20px 0; padding: 10px; background: rgba(255,255,0,0.2); border: 1px solid #ff0;">
+                <p style="color: #ff0; font-size: 0.9em;">🔊 Status do Áudio: <span id="audio-state">Verificando...</span></p>
+                <button id="enable-audio-btn" style="display: none;">HABILITAR ÁUDIO</button>
+            </div>
+            <button id="start-game-btn">INICIAR JOGO</button>
+            <button id="how-to-play-btn">COMO JOGAR</button>
+            <button id="settings-btn">CONFIGURAÇÕES</button>
+            <button id="credits-btn">CRÉDITOS</button>
+        </div>
+    </div>
+
+    <div id="how-to-play-screen" class="screen">
+        <div class="menu-container">
+            <h2>COMO JOGAR</h2>
+            <p style="text-align: left; max-width: 600px; margin: 20px auto;">
+                <strong>OBJETIVO:</strong> Sobreviva 8 dias e complete 8 tasks com seu grupo.<br><br>
+                <strong>MECÂNICAS:</strong><br>
+                • Cada dia dura 5 minutos reais<br>
+                • Visitantes batem na porta a cada hora<br>
+                • Use FOCAR NA REALIDADE para recuperar sanidade (3x/dia)<br>
+                • Use RÁDIO para obter informações (2x/dia)<br>
+                • Assista TV para entender a Mente Coletiva (1x/dia)<br>
+                • Mantenha INTIMIDADE com o grupo acima de 60%<br>
+                • Complete 1 task por dia na reunião do grupo<br><br>
+                <strong>CUIDADO:</strong> Se intimidade < 60%, você será expulso!
+            </p>
+            <button class="back-to-menu-btn">VOLTAR</button>
+        </div>
+    </div>
+
+    <div id="credits-screen" class="screen">
+        <div class="menu-container">
+            <h2>CRÉDITOS</h2>
+            <div class="credits-text">
+                <p><strong>CRIADOR DO JOGO</strong></p>
+                <p style="color: #ff0; font-size: 1.5em;">HALDO</p>
+                <br>
+                <p><strong>CONCEITO ORIGINAL</strong></p>
+                <p>PLURIBUS: A JUNÇÃO</p>
+                <br>
+                <p><strong>PROGRAMAÇÃO E DESIGN</strong></p>
+                <p>HALDO</p>
+                <br>
+                <p><strong>ANO</strong></p>
+                <p>2025</p>
+                <br>
+                <p style="color: #555; font-size: 0.8em;">
+                    "Mantenha-se infeliz. Mantenha-se vivo."
+                </p>
+            </div>
+            <button class="back-to-menu-btn">VOLTAR</button>
+        </div>
+    </div>
+
+    <div id="settings-screen" class="screen">
+        <div class="menu-container">
+            <h2>CONFIGURAÇÕES</h2>
+            <div class="setting-item">
+                <label for="music-volume">Volume (Música):</label>
+                <input type="range" id="music-volume" min="0" max="1" step="0.1" value="0.5">
+            </div>
+            <div class="setting-item">
+                <label for="sfx-volume">Volume (Efeitos):</label>
+                <input type="range" id="sfx-volume" min="0" max="1" step="0.1" value="0.5">
+            </div>
+            <button class="back-to-menu-btn">VOLTAR</button>
+        </div>
+    </div>
+
+    <div id="game-screen" class="screen">
+        <div id="game-hud">
+            <div class="hud-column">
+                <div class="hud-item">
+                    <span>SANIDADE:</span> <span id="hud-sanity">100%</span>
+                    <div id="sanity-bar-container"><div id="sanity-bar"></div></div>
+                </div>
+                <div class="hud-item">
+                    <span>INTIMIDADE:</span> <span id="hud-intimacy">100%</span>
+                    <div id="intimacy-bar-container"><div id="intimacy-bar"></div></div>
+                </div>
+            </div>
+            <div class="hud-column">
+                <div id="clock-display">
+                    DIA <span id="hud-day">1</span> - <span id="hud-time">00:00</span>
+                </div>
+                <div class="hud-item">
+                    <span>TASKS:</span> <span id="hud-tasks">0/8</span>
+                </div>
+                <div class="hud-item">
+                    <span>RECUSAS:</span> <span id="hud-refusals">3</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="apartment-hub-view" class="active-view">
+            <div class="hub-container">
+                <h2>Apartamento de Carol</h2>
+                <pre id="apartment-art">
++------------------------------------------------------+
+| JANELA BARRICADA                                     |
+|                                                      |
+|   [CAMA] (Eu só quero dormir)                        |
+|                                                      |
+|   [RÁDIO] (Chiado... vozes...)                       |
+|                                                      |
+|   [TV] (Transmissão...)                              |
+|                                                      |
+|   [TERMINAL] (Eu preciso focar)                      |
+|                                                      |
+|                                [PORTA] >>>           |
++------------------------------------------------------+
+                </pre>
+                <div class="hub-actions">
+                    <button id="hub-bed-btn">DESCANSAR (Pular 1h)</button>
+                    <button id="hub-radio-btn">OUVIR RÁDIO (<span id="radio-uses">2</span>/2)</button>
+                    <button id="hub-tv-btn">VER TV (<span id="tv-uses">1</span>/1)</button>
+                    <button id="hub-terminal-btn">FOCAR (<span id="terminal-uses">3</span>/3)</button>
+                    <button id="hub-door-btn" class="hidden">VERIFICAR PORTA</button>
+                </div>
+                <div id="hub-display-log">
+                    <p>Dia 1. Eu tenho que sobreviver.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="peephole-overlay" class="hidden">
+            <pre id="visitor-ascii-art"></pre>
+            <div id="peephole-ui">
+                <div id="tool-display"><p>Análise visual...</p></div>
+                <div id="dialogue-options"></div>
+                <div id="decision-buttons" class="hidden">
+                    <button id="open-door-btn">ABRIR PORTA</button>
+                    <button id="deny-visitor-btn">NÃO ABRIR</button>
+                </div>
+            </div>
+            <button id="exit-peephole-btn">PARAR DE OLHAR</button>
+        </div>
+    </div>
+
+    <div id="tv-watch-screen" class="screen">
+        <div class="menu-container">
+            <h2>TRANSMISSÃO DE EMERGÊNCIA</h2>
+            <pre id="tv-art">
+     .---------------.
+    /     0     0     \\
+   (    \\_______/    )
+    \\    1111111    /
+     '---------------'
+            </pre>
+            <div id="tv-dialogue-box">
+                <p id="tv-response">Selecione uma pergunta...</p>
+            </div>
+            <div id="tv-choices"></div>
+            <button id="close-tv-btn">DESLIGAR TV</button>
+        </div>
+    </div>
+
+    <div id="meeting-screen" class="screen">
+        <div class="meeting-container">
+            <h2 class="meeting-title">REUNIÃO DO GRUPO - DIA <span id="meeting-day">1</span></h2>
+            <p style="color: #aaa;">Escolha um membro para interagir ou selecione uma task</p>
+            
+            <div class="group-grid" id="group-members"></div>
+            
+            <div class="interaction-panel" id="interaction-panel">
+                <p style="color: #555;">Selecione um membro do grupo...</p>
+            </div>
+
+            <div style="margin-top: 30px; border-top: 2px solid #ff0; padding-top: 20px;">
+                <h3 style="color: #ff0;">TASK DO DIA</h3>
+                <p id="daily-task-description" style="color: #fff; margin: 15px 0;"></p>
+                <div id="task-choices"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-over-screen" class="screen">
+        <div class="menu-container">
+            <h2 id="game-over-title">FIM DE JOGO</h2>
+            <p id="game-over-message" style="margin: 20px 0; font-size: 1.2em;"></p>
+            <button class="back-to-menu-btn">VOLTAR AO MENU</button>
+        </div>
+    </div>
+
+    <script>
+// ===== AUDIO SYSTEM =====
+let audioEnabled = false;
+let audioContext = null;
+
+const sounds = {
+    // MÚSICAS (na mesma pasta do HTML)
+    menuMusic: new Audio('./menu_music.mp3'),
+    gameMusic: new Audio('./game_music.mp3'),
+    
+    // EFEITOS SONOROS (na mesma pasta do HTML)
+    knock: new Audio('./knock.mp3'),
+    doorOpen: new Audio('./door_open.mp3'),
+    doorDeny: new Audio('./door_deny.mp3'),
+    select: new Audio('./select.mp3'),
+    radio: new Audio('./radio.mp3'),
+    terminal: new Audio('./terminal.mp3'),
+    tv: new Audio('./tv.mp3'),
+    alarm: new Audio('./alarm.mp3'),
+    win: new Audio('./win.mp3'),
+    lose: new Audio('./lose.mp3'),
+    meeting: new Audio('./meeting.mp3')
+};
+
+// Configurar volume
+let masterVolume = 0.3;
+let sfxVolume = 0.5;
+
+// Adicionar listeners de erro para diagnóstico
+Object.keys(sounds).forEach(key => {
+    sounds[key].addEventListener('error', (e) => {
+        console.error(`Erro ao carregar ${key}:`, sounds[key].src);
+        updateAudioStatus(`❌ Erro: ${key}.mp3 não encontrado`);
+    });
+    sounds[key].addEventListener('canplaythrough', () => {
+        console.log(`✅ ${key}.mp3 carregado com sucesso`);
+    });
+});
+
+function updateAudioStatus(message) {
+    const statusEl = document.getElementById('audio-state');
+    if (statusEl) {
+        statusEl.textContent = message;
+    }
+}
+
+function enableAudio() {
+    audioEnabled = true;
+    
+    // Criar contexto de áudio (necessário para alguns browsers)
+    try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+    } catch (e) {
+        console.log('AudioContext not supported:', e);
+    }
+    
+    // Tentar tocar um som silencioso para desbloquear
+    sounds.select.volume = 0.01;
+    sounds.select.play().then(() => {
+        sounds.select.pause();
+        sounds.select.currentTime = 0;
+        updateAudioStatus('✅ Áudio Habilitado');
+        document.getElementById('enable-audio-btn').style.display = 'none';
+        
+        // Tocar música do menu
+        setVolume();
+        sounds.menuMusic.play().catch(e => {
+            console.log('Menu music error:', e);
+            updateAudioStatus('⚠️ Áudio parcialmente bloqueado');
+        });
+    }).catch(e => {
+        console.log('Audio unlock failed:', e);
+        updateAudioStatus('❌ Áudio bloqueado pelo navegador');
+    });
+}
+
+function setVolume() {
+    sounds.menuMusic.volume = masterVolume;
+    sounds.gameMusic.volume = masterVolume;
+    
+    Object.keys(sounds).forEach(key => {
+        if (key !== 'menuMusic' && key !== 'gameMusic') {
+            sounds[key].volume = sfxVolume * 0.7;
+        }
+    });
+}
+
+function playSound(soundName) {
+    if (!audioEnabled) {
+        console.log('Audio not enabled yet');
+        return;
+    }
+    
+    if (sounds[soundName]) {
+        try {
+            sounds[soundName].currentTime = 0;
+            const playPromise = sounds[soundName].play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    console.log(`Playing: ${soundName}`);
+                }).catch(e => {
+                    console.log(`Error playing ${soundName}:`, e);
+                });
+            }
+        } catch (e) {
+            console.log(`Exception playing ${soundName}:`, e);
+        }
+    } else {
+        console.log(`Sound not found: ${soundName}`);
+    }
+}
+
+function stopSound(soundName) {
+    if (sounds[soundName]) {
+        sounds[soundName].pause();
+        sounds[soundName].currentTime = 0;
+    }
+}
+
+function stopAllMusic() {
+    stopSound('menuMusic');
+    stopSound('gameMusic');
+}
+
+// Configurar loops
+sounds.menuMusic.loop = true;
+sounds.gameMusic.loop = true;
+
+// ===== GAME DATA =====
+const gameData = {
+    simulation: {
+        secondsPerMinute: 5,
+        hoursPerDay: 5,
+        totalDaysToSurvive: 8,
+        initialRefusals: 3,
+        dailyFocusUses: 3,
+        dailyRadioUses: 2,
+        dailyTVUses: 1
+    },
+    
+    groupMembers: [
+        { id: "m1", name: "Marcus", role: "Líder", status: "Determinado", intimacy: 50, traits: ["sério", "prático"] },
+        { id: "m2", name: "Ana", role: "Médica", status: "Cansada", intimacy: 50, traits: ["empática", "cautelosa"] },
+        { id: "m3", name: "Leo", role: "Técnico", status: "Nervoso", intimacy: 50, traits: ["esperto", "ansioso"] },
+        { id: "m4", name: "Sara", role: "Psicóloga", status: "Calma", intimacy: 50, traits: ["observadora", "carinhosa"] },
+        { id: "m5", name: "Diego", role: "Militar", status: "Alerta", intimacy: 50, traits: ["protetor", "rígido"] },
+        { id: "m6", name: "Julia", role: "Cientista", status: "Curiosa", intimacy: 50, traits: ["analítica", "teimosa"] }
+    ],
+    
+    interactions: [
+        { id: "talk", label: "CONVERSAR", intimacyChange: 5, sanityChange: 3 },
+        { id: "help", label: "OFERECER AJUDA", intimacyChange: 10, sanityChange: -5 },
+        { id: "joke", label: "FAZER PIADA", intimacyChange: 8, sanityChange: 5 },
+        { id: "share", label: "COMPARTILHAR MEDO", intimacyChange: 15, sanityChange: -10 },
+        { id: "distance", label: "MANTER DISTÂNCIA", intimacyChange: -5, sanityChange: 2 }
+    ],
+    
+    tasks: [
+        {
+            id: "t1", title: "Buscar Suprimentos",
+            description: "O grupo precisa de comida e água.",
+            choices: [
+                { text: "Ir ao supermercado (arriscado)", intimacy: 15, sanity: -10 },
+                { text: "Procurar em casas próximas (seguro)", intimacy: 8, sanity: -5 }
+            ]
+        },
+        {
+            id: "t2", title: "Fortificar Base",
+            description: "Precisamos reforçar as defesas.",
+            choices: [
+                { text: "Barricada externa (cansativo)", intimacy: 12, sanity: -15 },
+                { text: "Trancar portas internas (simples)", intimacy: 5, sanity: -5 }
+            ]
+        },
+        {
+            id: "t3", title: "Procurar Sobreviventes",
+            description: "Captamos um sinal de rádio.",
+            choices: [
+                { text: "Investigar o sinal (perigoso)", intimacy: 20, sanity: -20 },
+                { text: "Ignorar (seguro)", intimacy: -10, sanity: 5 }
+            ]
+        },
+        {
+            id: "t4", title: "Manter Comunicação",
+            description: "O rádio está falhando.",
+            choices: [
+                { text: "Consertar com peças (técnico)", intimacy: 10, sanity: -5 },
+                { text: "Buscar novo rádio (arriscado)", intimacy: 15, sanity: -15 }
+            ]
+        },
+        {
+            id: "t5", title: "Cuidar dos Feridos",
+            description: "Ana precisa de ajuda médica.",
+            choices: [
+                { text: "Buscar remédios (perigoso)", intimacy: 18, sanity: -12 },
+                { text: "Improvisar com o que temos", intimacy: 8, sanity: -8 }
+            ]
+        },
+        {
+            id: "t6", title: "Investigar a Mente Coletiva",
+            description: "Julia quer estudar 'Eles'.",
+            choices: [
+                { text: "Ajudar na pesquisa", intimacy: 12, sanity: -20 },
+                { text: "Recusar por segurança", intimacy: -5, sanity: 5 }
+            ]
+        },
+        {
+            id: "t7", title: "Planejar Evacuação",
+            description: "Marcus quer um plano de fuga.",
+            choices: [
+                { text: "Estudar rotas de escape", intimacy: 10, sanity: -8 },
+                { text: "Focar em resistir aqui", intimacy: 5, sanity: -5 }
+            ]
+        },
+        {
+            id: "t8", title: "Decisão Final",
+            description: "É o último dia. O que fazemos?",
+            choices: [
+                { text: "Resistir até o resgate", intimacy: 20, sanity: -15 },
+                { text: "Tentar escapar sozinhos", intimacy: -20, sanity: 10 }
+            ]
+        }
+    ],
+    
+    visitors: [
+        {
+            id: "v001", type: "Outro", name: "Sra. Henderson",
+            idleArt: `     .---------------.
+    /     0     0     \\
+   (    \\_______/    )
+    \\    1111111    /
+     '---------------'
+"ESTOU FELIZ, CAROL."`,
+            dialogues: [
+                { prompt: "O que você quer?", response: `     .---------------.
+    /     0     0     \\
+   (    \\_______/    )
+    \\    1111111    /
+     '---------------'
+"QUE VOCE SE JUNTE A NOS."`, sanity: -5 },
+                { prompt: "Vá embora!", response: `     .---------------.
+    /     0     0     \\
+   (    \\_______/    )
+    \\    1111111    /
+     '---------------'
+"NOS VOLTAREMOS."`, sanity: -3 }
+            ],
+            outcomes: {
+                open: { art: `
+ .-------------------.
+|  BEM-VINDA         |
+|  A JUNÇÃO          |
+ '-------------------'`, sanity: -100 },
+                deny: { art: `     .---------------.
+    /     0     0     \\
+   (    \\_______/    )
+    \\    1111111    /
+     '---------------'
+"NOS VOLTAREMOS."`, sanity: 5 }
+            }
+        },
+        {
+            id: "v002", type: "Humano", name: "Sobrevivente",
+            idleArt: `     !#?$*!#?%&!$#@?
+    /    O     O    \\
+   (     /\\_/\\     )
+    \\   9?8!2*4   /
+     '---------------'
+"ABRE!! POR FAVOR!!"`,
+            dialogues: [
+                { prompt: "Quem é você?", response: `     !#?$*!#?%&!$#@?
+    /    O     O    \\
+   (     /\\_/\\     )
+    \\   9?8!2*4   /
+     '---------------'
+"SOU HUMANO! ME DEIXA ENTRAR!"`, sanity: 5 },
+                { prompt: "Como posso confiar?", response: `     !#?$*!#?%&!$#@?
+    /    O     O    \\
+   (     /\\_/\\     )
+    \\   9?8!2*4   /
+     '---------------'
+"EU TO SOZINHO! POR FAVOR!"`, sanity: 3 }
+            ],
+            outcomes: {
+                open: { art: `"OBRIGADO... OBRIGADO..."
+
+(A pessoa desmaia
+ de exaustão)`, sanity: 20, intimacy: 10 },
+                deny: { art: `     !#?$*!#?%&!$#@?
+    /    o     o    \\
+   (     /\\_/\\     )
+    \\   ......    /
+     '---------------'
+"NAO!! ... eu...
+ me sinto... feliz."`, sanity: -25 }
+            }
+        },
+        {
+            id: "v003", type: "Outro", name: "A Isca",
+            idleArt: `     !#?$*!#?%&!$#@?
+    /    o     o    \\
+   (     /\\_/\\     )
+    \\   ?????????   /
+     '---------------'
+"EU SOU HUMANA!"`,
+            dialogues: [
+                { prompt: "Prove que é humana", response: `     !#?$*!#?%&!$#@?
+    /    o     o    \\
+   (     /\\_/\\     )
+    \\   ?????????   /
+     '---------------'
+"EU... EU... ABRA!"`, sanity: -5 }
+            ],
+            outcomes: {
+                open: { art: `     .---------------.
+    /     0     0     \\
+   (    \\_______/    )
+    \\    1111111    /
+     '---------------'
+"TE PEGUEI, CAROL."`, sanity: -100 },
+                deny: { art: `     .---------------.
+    /     0     0     \\
+   (    \\_______/    )
+    \\    1111111    /
+     '---------------'
+"... Quase."`, sanity: 10 }
+            }
+        }
+    ],
+    
+    radioMessages: [
+        { text: "...estática... alguém aí?...", sanity: 10 },
+        { text: "A Junção é pacífica. Não resista.", sanity: -10 },
+        { text: "(melodia estranha e calmante)", sanity: -5 },
+        { text: "Dia 3... ainda resistindo... água acabando...", sanity: 8 }
+    ],
+    
+    tvQuestions: [
+        { id: "q1", text: "Quem é você?", response: "Eu era o Senador Miles. Agora sou Nós. Sou a Sra. Henderson. Sou todos.", used: false },
+        { id: "q2", text: "O que vocês querem?", response: "Paz. O fim da infelicidade. Vocês sofrem tanto... nós somos a cura.", used: false },
+        { id: "q3", text: "Como eu luto?", response: "(risada calma) Você não pode. A resistência é exaustão. Cedo ou tarde, você vai descansar.", used: false },
+        { id: "q4", text: "O que é a Junção?", response: "Somos um. Uma mente. Felicidade eterna. Sem dor, sem medo, sem solidão.", used: false }
+    ]
+};
+
+// ===== GAME STATE =====
+let game = {
+    sanity: 100,
+    intimacy: 100,
+    day: 1,
+    tasksCompleted: 0,
+    time: { h: 0, m: 0 },
+    dailyRefusals: 3,
+    focusUses: 3,
+    radioUses: 2,
+    tvUses: 1,
+    currentVisitor: null,
+    selectedMember: null,
+    gameLoop: null,
+    state: "menu",
+    isDecisionMade: false
+};
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+    // Show main menu after loading
+    setTimeout(() => {
+        showScreen('mainMenu');
+        updateAudioStatus('⚠️ Clique para habilitar áudio');
+        document.getElementById('enable-audio-btn').style.display = 'inline-block';
+        
+        // Verificar se arquivos existem
+        checkAudioFiles();
+    }, 1500);
+
+    // Enable audio button
+    document.getElementById('enable-audio-btn').onclick = () => {
+        enableAudio();
+    };
+
+    // Menu buttons
+    document.getElementById('start-game-btn').onclick = startGame;
+    document.getElementById('how-to-play-btn').onclick = () => {
+        playSound('select');
+        showScreen('howToPlay');
+    };
+    document.getElementById('settings-btn').onclick = () => {
+        playSound('select');
+        showScreen('settings');
+    };
+    document.getElementById('credits-btn').onclick = () => {
+        playSound('select');
+        showScreen('credits');
+    };
+    document.querySelectorAll('.back-to-menu-btn').forEach(btn => {
+        btn.onclick = () => {
+            playSound('select');
+            stopAllMusic();
+            if (audioEnabled) {
+                sounds.menuMusic.play().catch(e => console.log('Menu music error:', e));
+            }
+            showScreen('mainMenu');
+        };
+    });
+
+    // Volume controls
+    document.getElementById('music-volume').addEventListener('input', (e) => {
+        masterVolume = parseFloat(e.target.value);
+        setVolume();
+        playSound('select');
+    });
+    document.getElementById('sfx-volume').addEventListener('input', (e) => {
+        sfxVolume = parseFloat(e.target.value);
+        setVolume();
+        playSound('select');
+    });
+    
+    // Initialize volume
+    setVolume();
+
+    // Hub buttons
+    document.getElementById('hub-bed-btn').onclick = useBed;
+    document.getElementById('hub-radio-btn').onclick = useRadio;
+    document.getElementById('hub-tv-btn').onclick = openTVScreen;
+    document.getElementById('hub-terminal-btn').onclick = useFocus;
+    document.getElementById('hub-door-btn').onclick = enterPeephole;
+
+    // Peephole buttons
+    document.getElementById('exit-peephole-btn').onclick = exitPeephole;
+    document.getElementById('open-door-btn').onclick = () => makeDecision('open');
+    document.getElementById('deny-visitor-btn').onclick = () => makeDecision('deny');
+
+    // TV button
+    document.getElementById('close-tv-btn').onclick = closeTVScreen;
+});
+
+// Verificar se arquivos de áudio existem
+function checkAudioFiles() {
+    const requiredFiles = [
+        'menu_music.mp3', 'game_music.mp3',
+        'knock.mp3', 'door_open.mp3', 'door_deny.mp3',
+        'select.mp3', 'radio.mp3', 'terminal.mp3',
+        'tv.mp3', 'alarm.mp3', 'win.mp3', 'lose.mp3', 'meeting.mp3'
+    ];
+    
+    console.log('📁 ARQUIVOS DE ÁUDIO NECESSÁRIOS:');
+    console.log('Coloque estes arquivos na MESMA PASTA do HTML:');
+    requiredFiles.forEach(file => {
+        console.log(`  - ${file}`);
+    });
+    console.log('\n💡 DICA: Use ./ no início do caminho (ex: ./select.mp3)');
+}
+
+// ===== CORE FUNCTIONS =====
+function showScreen(name) {
+    const screens = {
+        loading: document.getElementById('loading-screen'),
+        mainMenu: document.getElementById('main-menu-screen'),
+        howToPlay: document.getElementById('how-to-play-screen'),
+        credits: document.getElementById('credits-screen'),
+        settings: document.getElementById('settings-screen'),
+        game: document.getElementById('game-screen'),
+        tvWatch: document.getElementById('tv-watch-screen'),
+        meeting: document.getElementById('meeting-screen'),
+        gameOver: document.getElementById('game-over-screen')
+    };
+    
+    Object.values(screens).forEach(s => s.classList.remove('active'));
+    screens[name].classList.add('active');
+    game.state = name;
+}
+
+function updateHUD() {
+    document.getElementById('hud-sanity').textContent = Math.round(game.sanity) + '%';
+    document.getElementById('hud-intimacy').textContent = Math.round(game.intimacy) + '%';
+    document.getElementById('hud-day').textContent = game.day;
+    document.getElementById('hud-time').textContent = 
+        `${String(game.time.h).padStart(2, '0')}:${String(game.time.m).padStart(2, '0')}`;
+    document.getElementById('hud-tasks').textContent = `${game.tasksCompleted}/8`;
+    document.getElementById('hud-refusals').textContent = game.dailyRefusals;
+    
+    document.getElementById('sanity-bar').style.width = game.sanity + '%';
+    document.getElementById('intimacy-bar').style.width = game.intimacy + '%';
+    
+    // Update bar colors
+    if (game.sanity > 60) {
+        document.getElementById('sanity-bar').style.background = '#fff';
+    } else if (game.sanity > 30) {
+        document.getElementById('sanity-bar').style.background = '#ff0';
+    } else {
+        document.getElementById('sanity-bar').style.background = '#f00';
+    }
+    
+    if (game.intimacy > 60) {
+        document.getElementById('intimacy-bar').style.background = '#0f0';
+    } else if (game.intimacy > 30) {
+        document.getElementById('intimacy-bar').style.background = '#ff0';
+    } else {
+        document.getElementById('intimacy-bar').style.background = '#f00';
+    }
+    
+    // Update use counters
+    document.getElementById('radio-uses').textContent = game.radioUses;
+    document.getElementById('tv-uses').textContent = game.tvUses;
+    document.getElementById('terminal-uses').textContent = game.focusUses;
+    
+    // Disable buttons if no uses left
+    document.getElementById('hub-radio-btn').disabled = (game.radioUses <= 0);
+    document.getElementById('hub-tv-btn').disabled = (game.tvUses <= 0);
+    document.getElementById('hub-terminal-btn').disabled = (game.focusUses <= 0);
+    document.getElementById('deny-visitor-btn').disabled = (game.dailyRefusals <= 0);
+}
+
+function changeSanity(amount) {
+    game.sanity += amount;
+    if (game.sanity > 100) game.sanity = 100;
+    if (game.sanity <= 0) {
+        game.sanity = 0;
+        updateHUD();
+        endGame('sanity');
+        return;
+    }
+    updateHUD();
+}
+
+function changeIntimacy(amount) {
+    game.intimacy += amount;
+    if (game.intimacy > 100) game.intimacy = 100;
+    if (game.intimacy < 60) {
+        updateHUD();
+        endGame('intimacy');
+        return;
+    }
+    updateHUD();
+}
+
+function setHubMessage(text) {
+    document.getElementById('hub-display-log').innerHTML = `<p>${text}</p>`;
+}
+
+// ===== GAME START =====
+function startGame() {
+    playSound('select');
+    
+    // Parar música do menu e iniciar música do jogo
+    stopSound('menuMusic');
+    setTimeout(() => {
+        sounds.gameMusic.play().catch(e => {
+            console.log('Game music blocked - user needs to interact first');
+        });
+    }, 100);
+    
+    game = {
+        sanity: 100,
+        intimacy: 100,
+        day: 1,
+        tasksCompleted: 0,
+        time: { h: 0, m: 0 },
+        dailyRefusals: 3,
+        focusUses: 3,
+        radioUses: 2,
+        tvUses: 1,
+        currentVisitor: null,
+        selectedMember: null,
+        gameLoop: null,
+        state: "game",
+        isDecisionMade: false
+    };
+    
+    // Reset TV questions
+    gameData.tvQuestions.forEach(q => q.used = false);
+    
+    setVolume();
+    showScreen('game');
+    updateHUD();
+    setHubMessage("Dia 1. Eu tenho que sobreviver. 8 dias. 8 tasks.");
+    
+    // Start game loop
+    game.gameLoop = setInterval(gameTick, 1000);
+}
+
+function gameTick() {
+    if (game.state !== 'game') return;
+    
+    game.time.m++;
+    
+    if (game.time.m >= 60) {
+        game.time.m = 0;
+        game.time.h++;
+        
+        // Trigger knock every hour
+        triggerKnock();
+        
+        // End day after 5 hours
+        if (game.time.h >= gameData.simulation.hoursPerDay) {
+            endDay();
+        }
+    }
+    
+    updateHUD();
+}
+
+function endDay() {
+    clearInterval(game.gameLoop);
+    startMeeting();
+}
+
+// ===== HUB ACTIONS =====
+function useBed() {
+    playSound('select');
+    setHubMessage("Pulei uma hora. O tempo não para...");
+    game.time.h++;
+    game.time.m = 0;
+    
+    if (game.time.h >= gameData.simulation.hoursPerDay) {
+        endDay();
+    } else {
+        triggerKnock();
+    }
+}
+
+function useRadio() {
+    if (game.radioUses <= 0) return;
+    
+    playSound('radio');
+    game.radioUses--;
+    
+    setTimeout(() => {
+        const msg = gameData.radioMessages[Math.floor(Math.random() * gameData.radioMessages.length)];
+        changeSanity(msg.sanity);
+        setHubMessage(`[RÁDIO]: "${msg.text}"`);
+        updateHUD();
+    }, 500);
+}
+
+function useFocus() {
+    if (game.focusUses <= 0) return;
+    
+    playSound('terminal');
+    game.focusUses--;
+    changeSanity(15);
+    setHubMessage("Eu me concentro. Lembro quem eu sou. Isso me mantém forte.");
+    updateHUD();
+}
+
+function openTVScreen() {
+    if (game.tvUses <= 0) return;
+    
+    playSound('tv');
+    game.tvUses--;
+    showScreen('tvWatch');
+    
+    // Render TV questions
+    const tvChoices = document.getElementById('tv-choices');
+    tvChoices.innerHTML = '';
+    
+    gameData.tvQuestions.forEach(q => {
+        if (!q.used) {
+            const btn = document.createElement('button');
+            btn.textContent = q.text;
+            btn.onclick = () => {
+                playSound('select');
+                document.getElementById('tv-response').textContent = q.response;
+                changeSanity(-5);
+                q.used = true;
+                btn.disabled = true;
+            };
+            tvChoices.appendChild(btn);
+        }
+    });
+}
+
+function closeTVScreen() {
+    playSound('select');
+    showScreen('game');
+    setHubMessage("Desliguei a TV. Essas vozes... elas sabem muito.");
+    updateHUD();
+}
+
+// ===== VISITOR SYSTEM =====
+function triggerKnock() {
+    if (game.state !== 'game') return;
+    
+    playSound('knock');
+    playSound('alarm');
+    
+    game.currentVisitor = gameData.visitors[Math.floor(Math.random() * gameData.visitors.length)];
+    document.getElementById('hub-door-btn').classList.remove('hidden');
+    setHubMessage("ALGUÉM ESTÁ BATENDO NA PORTA!");
+    
+    // Disable other actions
+    document.getElementById('hub-bed-btn').disabled = true;
+    document.getElementById('hub-radio-btn').disabled = true;
+    document.getElementById('hub-tv-btn').disabled = true;
+    document.getElementById('hub-terminal-btn').disabled = true;
+}
+
+function enterPeephole() {
+    playSound('select');
+    game.state = 'peephole';
+    document.getElementById('peephole-overlay').classList.remove('hidden');
+    document.getElementById('hub-door-btn').classList.add('hidden');
+    game.isDecisionMade = false;
+    
+    // Show visitor
+    document.getElementById('visitor-ascii-art').textContent = game.currentVisitor.idleArt;
+    document.getElementById('tool-display').innerHTML = `<p>Tipo: ${game.currentVisitor.type} | Nome: ${game.currentVisitor.name}</p>`;
+    
+    // Render dialogue options
+    const dialogueOptions = document.getElementById('dialogue-options');
+    dialogueOptions.innerHTML = '';
+    
+    game.currentVisitor.dialogues.forEach(d => {
+        const btn = document.createElement('button');
+        btn.textContent = d.prompt;
+        btn.onclick = () => {
+            playSound('select');
+            document.getElementById('visitor-ascii-art').textContent = d.response;
+            changeSanity(d.sanity);
+            document.getElementById('decision-buttons').classList.remove('hidden');
+        };
+        dialogueOptions.appendChild(btn);
+    });
+}
+
+function exitPeephole() {
+    if (game.isDecisionMade) return;
+    
+    playSound('select');
+    document.getElementById('peephole-overlay').classList.add('hidden');
+    game.state = 'game';
+    setHubMessage("Me afastei da porta. O tempo continua...");
+    
+    // Re-enable actions
+    document.getElementById('hub-bed-btn').disabled = false;
+    document.getElementById('hub-radio-btn').disabled = false;
+    document.getElementById('hub-tv-btn').disabled = false;
+    document.getElementById('hub-terminal-btn').disabled = false;
+    
+    updateHUD();
+}
+
+function makeDecision(choice) {
+    if (game.isDecisionMade) return;
+    game.isDecisionMade = true;
+    
+    // Play sound based on choice
+    if (choice === 'open') {
+        playSound('doorOpen');
+    } else {
+        playSound('doorDeny');
+    }
+    
+    const outcome = game.currentVisitor.outcomes[choice];
+    document.getElementById('visitor-ascii-art').textContent = outcome.art;
+    document.getElementById('dialogue-options').innerHTML = '';
+    document.getElementById('decision-buttons').classList.add('hidden');
+    
+    if (choice === 'deny') {
+        game.dailyRefusals--;
+    }
+    
+    setTimeout(() => {
+        changeSanity(outcome.sanity);
+        if (outcome.intimacy) changeIntimacy(outcome.intimacy);
+        
+        if (game.sanity > 0 && game.intimacy >= 60) {
+            document.getElementById('peephole-overlay').classList.add('hidden');
+            game.state = 'game';
+            setHubMessage(`Decisão tomada. ${choice === 'open' ? 'Abri a porta.' : 'Recusei a entrada.'}`);
+            
+            // Re-enable actions
+            document.getElementById('hub-bed-btn').disabled = false;
+            document.getElementById('hub-radio-btn').disabled = false;
+            document.getElementById('hub-tv-btn').disabled = false;
+            document.getElementById('hub-terminal-btn').disabled = false;
+        }
+    }, 3000);
+}
+
+// ===== MEETING SYSTEM =====
+function startMeeting() {
+    playSound('meeting');
+    showScreen('meeting');
+    document.getElementById('meeting-day').textContent = game.day;
+    
+    // Render group members
+    const grid = document.getElementById('group-members');
+    grid.innerHTML = '';
+    
+    gameData.groupMembers.forEach(member => {
+        const card = document.createElement('div');
+        card.className = 'member-card';
+        card.innerHTML = `
+            <div class="member-name">${member.name}</div>
+            <div class="member-status">${member.role}</div>
+            <div class="member-status">${member.status}</div>
+            <div class="intimacy-level">Intimidade: ${member.intimacy}%</div>
+        `;
+        card.onclick = () => {
+            playSound('select');
+            selectMember(member);
+        };
+        grid.appendChild(card);
+    });
+    
+    // Render task
+    const task = gameData.tasks[game.tasksCompleted];
+    document.getElementById('daily-task-description').textContent = task.description;
+    
+    const taskChoices = document.getElementById('task-choices');
+    taskChoices.innerHTML = '';
+    
+    task.choices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.textContent = choice.text;
+        btn.onclick = () => {
+            playSound('select');
+            completeTask(choice);
+        };
+        taskChoices.appendChild(btn);
+    });
+}
+
+function selectMember(member) {
+    game.selectedMember = member;
+    
+    // Highlight selected
+    document.querySelectorAll('.member-card').forEach(c => c.classList.remove('selected'));
+    event.target.closest('.member-card').classList.add('selected');
+    
+    // Show interaction options
+    const panel = document.getElementById('interaction-panel');
+    panel.innerHTML = `<h3 style="color: #ff0;">${member.name} - ${member.role}</h3>
+        <p style="color: #aaa;">"${member.status}"</p>
+        <p style="color: #0f0;">Intimidade: ${member.intimacy}%</p>
+        <div class="interaction-buttons"></div>`;
+    
+    const btns = panel.querySelector('.interaction-buttons');
+    gameData.interactions.forEach(action => {
+        const btn = document.createElement('button');
+        btn.textContent = action.label;
+        btn.onclick = () => {
+            playSound('select');
+            interact(member, action);
+        };
+        btns.appendChild(btn);
+    });
+}
+
+function interact(member, action) {
+    member.intimacy += action.intimacyChange;
+    if (member.intimacy > 100) member.intimacy = 100;
+    if (member.intimacy < 0) member.intimacy = 0;
+    
+    changeSanity(action.sanityChange);
+    
+    // Update avg intimacy
+    const avg = gameData.groupMembers.reduce((sum, m) => sum + m.intimacy, 0) / gameData.groupMembers.length;
+    game.intimacy = avg;
+    
+    selectMember(member); // Refresh display
+}
+
+function completeTask(choice) {
+    game.tasksCompleted++;
+    changeIntimacy(choice.intimacy);
+    changeSanity(choice.sanity);
+    
+    if (game.sanity <= 0 || game.intimacy < 60) return;
+    
+    // Check win condition
+    if (game.tasksCompleted >= 8 && game.day >= 8) {
+        endGame('win');
+        return;
+    }
+    
+    // Next day
+    game.day++;
+    game.time = { h: 0, m: 0 };
+    game.dailyRefusals = gameData.simulation.initialRefusals;
+    game.focusUses = gameData.simulation.dailyFocusUses;
+    game.radioUses = gameData.simulation.dailyRadioUses;
+    game.tvUses = gameData.simulation.dailyTVUses;
+    
+    showScreen('game');
+    updateHUD();
+    setHubMessage(`Dia ${game.day}. A luta continua. Tasks: ${game.tasksCompleted}/8`);
+    
+    game.gameLoop = setInterval(gameTick, 1000);
+}
+
+// ===== GAME OVER =====
+function endGame(reason) {
+    clearInterval(game.gameLoop);
+    showScreen('gameOver');
+    
+    const title = document.getElementById('game-over-title');
+    const message = document.getElementById('game-over-message');
+    
+    // Parar música do jogo
+    stopSound('gameMusic');
+    
+    if (reason === 'win') {
+        playSound('win');
+        title.textContent = 'VITÓRIA!';
+        message.textContent = `Dia 8. Você completou todas as tasks. O grupo sobreviveu. A ajuda está vindo. Você manteve sua humanidade... e sua sanidade.`;
+    } else if (reason === 'sanity') {
+        playSound('lose');
+        title.textContent = 'CONEXÃO ESTABELECIDA';
+        message.textContent = 'Eu me sinto... calma. Eu me sinto... feliz. Eu não sou mais eu. Eu sou Nós.';
+    } else if (reason === 'intimacy') {
+        playSound('lose');
+        title.textContent = 'EXPULSA DO GRUPO';
+        message.textContent = 'O grupo votou. Você não é mais confiável. Você está sozinha. Eles estão vindo...';
+    }
+}
+    </script>
+</body>
+</html>
